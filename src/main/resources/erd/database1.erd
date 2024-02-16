@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diagram version="1" name="database1.erd">
+	<entities>
+		<data-source id="mysql8-189aa6e182e-1f3899f49c32d8e7">
+			<entity id="1" name="ADMINS" fq-name="database1.ADMINS" order="0" font="Segoe UI:9:0" x="460" y="68">
+				<path name="database1"/>
+			</entity>
+			<entity id="2" name="BOOK_MARK" fq-name="database1.BOOK_MARK" order="1" font="Segoe UI:9:0" x="1451" y="381">
+				<path name="database1"/>
+			</entity>
+			<entity id="3" name="CUSTOMERS" fq-name="database1.CUSTOMERS" order="2" font="Segoe UI:9:0" x="1026" y="162">
+				<path name="database1"/>
+			</entity>
+			<entity id="4" name="FOLLOW" fq-name="database1.FOLLOW" order="3" font="Segoe UI:9:0" x="1453" y="60">
+				<path name="database1"/>
+			</entity>
+			<entity id="5" name="FOODS" fq-name="database1.FOODS" order="4" font="Segoe UI:9:0" x="1862" y="1008">
+				<path name="database1"/>
+			</entity>
+			<entity id="6" name="OWNERS" fq-name="database1.OWNERS" order="5" font="Segoe UI:9:0" x="1805" y="28">
+				<path name="database1"/>
+			</entity>
+			<entity id="7" name="POST" fq-name="database1.POST" order="6" font="Segoe UI:9:0" x="840" y="675">
+				<path name="database1"/>
+			</entity>
+			<entity id="8" name="POST_COMMENT" fq-name="database1.POST_COMMENT" order="7" font="Segoe UI:9:0" x="534" y="1021">
+				<path name="database1"/>
+			</entity>
+			<entity id="9" name="POST_PICTURE" fq-name="database1.POST_PICTURE" order="8" font="Segoe UI:9:0" x="978" y="1021">
+				<path name="database1"/>
+			</entity>
+			<entity id="10" name="REPORTS" fq-name="database1.REPORTS" order="9" font="Segoe UI:9:0" x="480" y="435">
+				<path name="database1"/>
+			</entity>
+			<entity id="11" name="REVIEWS" fq-name="database1.REVIEWS" order="10" font="Segoe UI:9:0" x="1364" y="730">
+				<path name="database1"/>
+			</entity>
+			<entity id="12" name="REVIEW_COMMENT" fq-name="database1.REVIEW_COMMENT" order="11" font="Segoe UI:9:0" x="1275" y="1027">
+				<path name="database1"/>
+			</entity>
+			<entity id="13" name="REVIEW_PICTURES" fq-name="database1.REVIEW_PICTURES" order="12" font="Segoe UI:9:0" x="1577" y="1024">
+				<path name="database1"/>
+			</entity>
+			<entity id="14" name="STORES" fq-name="database1.STORES" order="13" font="Segoe UI:9:0" x="1787" y="479">
+				<path name="database1"/>
+			</entity>
+			<entity id="15" name="STORE_OPENTIMES" fq-name="database1.STORE_OPENTIMES" order="14" font="Segoe UI:9:0" x="2164" y="692">
+				<path name="database1"/>
+			</entity>
+		</data-source>
+	</entities>
+	<relations>
+		<relation name="REPORTS_FK_3" fq-name="database1.REPORTS.REPORTS_FK_3" type="fk" pk-ref="1" fk-ref="10"/>
+		<relation name="BOOK_MARK_FK" fq-name="database1.BOOK_MARK.BOOK_MARK_FK" type="fk" pk-ref="3" fk-ref="2"/>
+		<relation name="FOLLOW_FK" fq-name="database1.FOLLOW.FOLLOW_FK" type="fk" pk-ref="3" fk-ref="4"/>
+		<relation name="FOLLOW_FK_1" fq-name="database1.FOLLOW.FOLLOW_FK_1" type="fk" pk-ref="3" fk-ref="4"/>
+		<relation name="POST_ibfk_2" fq-name="database1.POST.POST_ibfk_2" type="fk" pk-ref="3" fk-ref="7"/>
+		<relation name="REPORTS_FK_2" fq-name="database1.REPORTS.REPORTS_FK_2" type="fk" pk-ref="3" fk-ref="10"/>
+		<relation name="REVIEWS_FK" fq-name="database1.REVIEWS.REVIEWS_FK" type="fk" pk-ref="3" fk-ref="11"/>
+		<relation name="STORES_FK" fq-name="database1.STORES.STORES_FK" type="fk" pk-ref="6" fk-ref="14"/>
+		<relation name="POST_COMMENT_ibfk_1" fq-name="database1.POST_COMMENT.POST_COMMENT_ibfk_1" type="fk" pk-ref="7" fk-ref="8"/>
+		<relation name="POST_PICTURE_ibfk_1" fq-name="database1.POST_PICTURE.POST_PICTURE_ibfk_1" type="fk" pk-ref="7" fk-ref="9"/>
+		<relation name="REPORTS_FK" fq-name="database1.REPORTS.REPORTS_FK" type="fk" pk-ref="7" fk-ref="10"/>
+		<relation name="REPORTS_FK_1" fq-name="database1.REPORTS.REPORTS_FK_1" type="fk" pk-ref="11" fk-ref="10"/>
+		<relation name="REVIEW_COMMENT_FK" fq-name="database1.REVIEW_COMMENT.REVIEW_COMMENT_FK" type="fk" pk-ref="11" fk-ref="12"/>
+		<relation name="REVIEW_PICTURES_FK" fq-name="database1.REVIEW_PICTURES.REVIEW_PICTURES_FK" type="fk" pk-ref="11" fk-ref="13"/>
+		<relation name="BOOK_MARK_FK_1" fq-name="database1.BOOK_MARK.BOOK_MARK_FK_1" type="fk" pk-ref="14" fk-ref="2"/>
+		<relation name="FOODS_FK" fq-name="database1.FOODS.FOODS_FK" type="fk" pk-ref="14" fk-ref="5"/>
+		<relation name="POST_ibfk_1" fq-name="database1.POST.POST_ibfk_1" type="fk" pk-ref="14" fk-ref="7"/>
+		<relation name="REVIEWS_FK_1" fq-name="database1.REVIEWS.REVIEWS_FK_1" type="fk" pk-ref="14" fk-ref="11"/>
+		<relation name="STORE_OPENTIMES_ibfk_1" fq-name="database1.STORE_OPENTIMES.STORE_OPENTIMES_ibfk_1" type="fk" pk-ref="14" fk-ref="15"/>
+	</relations>
+</diagram>

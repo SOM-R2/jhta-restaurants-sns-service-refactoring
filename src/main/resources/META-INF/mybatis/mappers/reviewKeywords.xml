@@ -1,0 +1,29 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.ReviewKeywordMapper">
+	
+	<insert id="insertReveiwKeyword" parameterType="ReviewKeyword">
+	  insert into REVIEW_KEYWORDS
+	  (keyword, review_id)
+	  values
+	  (#{keyword}, #{review.id})
+	</insert>
+	
+	<select id = "getReviewKeywordsByReviewId" parameterType="int" resultType="ReviewKeyword">
+		select 
+			id,			
+			keyword,	
+			review_id		as "review.id"
+		from 
+			REVIEW_KEYWORDS
+		where 
+			review_id = #{value};
+	</select>
+	
+	<delete id="deleteReviewKeywords" parameterType="int">
+		delete from 
+			REVIEW_KEYWORDS
+		where
+			review_id = #{value};
+	</delete>
+
+</mapper>

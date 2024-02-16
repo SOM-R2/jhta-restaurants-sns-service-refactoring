@@ -1,0 +1,185 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.PostMapper">
+
+	<select id="getAllPosts" resultType="PostContentsDto">
+	    select
+			p.id             as id,
+			p.title          as title,
+			p.sub_title      as subTitle,
+			p.create_date 	 as createDate,
+			p.update_date 	 as updateDate,
+			p.customer_id    as customerId,
+			u.username 	   	 as userName,
+			(   SELECT picture_file
+		        FROM POST_DATA d
+		        WHERE p.id = d.post_id
+		        LIMIT 1
+		    ) as pictureFile
+		from
+			POSTS p
+		inner join
+			USERS u on p.customer_id = u.id
+	    order by
+			p.create_date desc
+		limit
+			#{start}, #{limit}
+	</select>
+	
+	<select id="getPostsPaginatedOfFollowersByFollowed" resultType="PostContentsDto">
+		select
+			p.id             as id,
+			p.title          as title,
+			p.sub_title      as subTitle,
+			p.create_date 	 as createDate,
+			p.update_date 	 as updateDate,
+			p.customer_id    as customerId,
+			u.username 	   	 as userName,
+			(   SELECT picture_file
+		        FROM POST_DATA d
+		        WHERE p.id = d.post_id
+		        LIMIT 1
+		    ) as pictureFile
+		from
+			POSTS p
+		inner join
+			USERS u on p.customer_id = u.id
+		where
+			p.customer_id in (
+				select follower_id
+				from FOLLOWS
+				where followed_id = #{followedId}
+			)
+		order by
+			p.create_date desc
+		limit
+			#{start}, #{limit}
+	</select>
+	
+	<select id="getRecentPostsThree" resultType="PostContentsDto">
+	    select
+			p.id             as id,
+			p.title          as title,
+			p.sub_title      as subTitle,
+			p.create_date 	 as createDate,
+			p.update_date 	 as updateDate,
+			p.customer_id    as customerId,
+			u.username 	   	 as userName,
+			(   SELECT picture_file
+		        FROM POST_DATA d
+		        WHERE p.id = d.post_id
+		        LIMIT 1
+		    ) as pictureFile
+		from
+			POSTS p
+		inner join
+			USERS u on p.customer_id = u.id
+	    order by
+			p.create_date desc
+	    limit
+			0, 3
+	</select>
+	
+	<select id="getRecentPostsThreeOfFollowersByFollowed" parameterType="int" resultType="PostContentsDto">
+		select
+			p.id             as id,
+			p.title          as title,
+			p.sub_title      as subTitle,
+			p.create_date 	 as createDate,
+			p.update_date 	 as updateDate,
+			p.customer_id    as customerId,
+			u.username 	   	 as userName,
+			(   SELECT picture_file
+		        FROM POST_DATA d
+		        WHERE p.id = d.post_id
+		        LIMIT 1
+		    ) as pictureFile
+		from
+			POSTS p
+		inner join
+			USERS u on p.customer_id = u.id
+		where
+			p.customer_id in (
+				select follower_id
+				from FOLLOWS
+				where followed_id = #{followedId}
+			)
+		order by
+			p.create_date desc
+		limit
+			0, 3
+	</select>
+	
+	<select id="getPostById" parameterType="int" resultType="Post">
+		select 
+			p.id				as id,
+			p.title			as title,
+			p.sub_title		as subTitle,
+			p.create_date		as createDate,
+			p.update_date		as updateDate,
+			p.customer_id			as "customer.id",
+			p.report_count	as reportCount,
+			p.disabled		as disabled,
+			p.blocked			as blocked,
+			u.username	as "customer.username"
+		from
+			POSTS p, USERS u
+		where	
+			p.customer_id = u.id
+		and	p.id = #{id}
+	</select>
+	
+	<insert id="insertPost" parameterType="Post">
+		<selectKey keyProperty="id" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+		insert into POSTS
+		(title, sub_title, customer_id, create_date, update_date)
+		values
+		(#{title}, #{subTitle}, #{customer.id}, #{createDate}, #{updateDate})
+	</insert>
+
+	<delete id="deletePost" parameterType="int">
+		delete 
+		from 
+			POSTS
+		where
+			id = #{value}
+	</delete>
+
+	<select id="getPostsByStoreSearch" parameterType="map" resultType="PostContentsDto">
+		SELECT 
+			p.id as id, 
+			MAX(p.title) as title, 
+			MAX(p.sub_title) as subTitle,
+			MAX(pd.picture_file) as pictureFile  
+		FROM POSTS p
+		JOIN POST_DATA pd ON p.id = pd.post_id
+		WHERE pd.store_id IN (
+		    SELECT S.id
+		    FROM STORES S
+		    LEFT join FOODS F on S.id = F.store_id
+		    <where>
+				<if test="category != null">
+				     S.category =  #{category}
+			    </if>
+			   
+				<if test="keyword != null">
+					and
+					(S.name like CONCAT('%', #{keyword}, '%')
+					or F.name like CONCAT('%', #{keyword}, '%')
+					or S.address like CONCAT('%', #{keyword}, '%'))
+				</if>
+				
+				<if test="xStart != null">
+					and 
+					(#{xStart} &lt; S.longitude) and (S.longitude &lt; #{xEnd}) and
+					(#{yStart} &lt; S.latitude) and (S.latitude &lt; #{yEnd})
+				</if>
+			</where>
+		)
+		GROUP BY p.id
+		order by p.liked_count desc
+		limit 3
+	</select>
+	
+</mapper>

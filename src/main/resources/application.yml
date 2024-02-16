@@ -1,0 +1,75 @@
+# 내장 웹 서버의 포트 번호 지정
+server:
+  port: 80
+
+# 로그레벨 지정하기
+logging:
+  level:
+    # 애플리케이션의 기본 로그레벨을 info로 지정
+    root: info
+    #org.springframework.web 패키지에 대해서는 로그레벨을 trace로 지정
+    #    '[org.springframework.web]': trace
+    # mybatis 실행시 sql및 sql 실행결과가 로그로 출력됨
+    '[kr.co.jhta.restaurants_service.mapper]': trace
+
+spring:
+  # 커넥션 풀 설정
+  datasource:
+    url: jdbc:mysql://localhost:3306/database1
+    username: root
+    password: 0000
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+#spring:
+#  # 커넥션 풀 설정
+#  datasource:
+#    url: jdbc:mysql://jhtafinal.c8qipvzhd4ot.ap-northeast-2.rds.amazonaws.com:3306/database1
+#    username: admin
+#    password: zxcv1234
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+  #  datasource:
+  #    driver-class-name: oracle.jdbc.OracleDriver
+  #    url: jdbc:oracle:thin:@localhost:1521:xe
+  #    username: C##jhta
+  #    password: 1234
+
+  # spring web mvc의 뷰 템플릿 경로 설정
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: duqrlvlfry02@gmail.com
+    password: sjleee1!
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+#  main:
+#    allow-bean-definition-overriding: true
+#  cloud:
+#    gcp:
+#      storage:
+#        credentials:
+#          location: classpath:clean-utility-397500-2724d898a363.json
+
+mybatis:
+  mapper-locations:
+    - META-INF/mybatis/mappers/*.xml
+  configuration:
+    jdbc-type-for-null: 'NULL'
+    log-impl: org.apache.ibatis.logging.log4j2.Log4j2Impl
+  type-aliases-package: kr.co.jhta.restaurants_service.vo.store, kr.co.jhta.restaurants_service.dto, kr.co.jhta.restaurants_service.vo.user, kr.co.jhta.restaurants_service.vo.store, kr.co.jhta.restaurants_service.vo.socials, kr.co.jhta.restaurants_service.vo.review, kr.co.jhta.restaurants_service.vo.post
+
+data:
+  go:
+    kr:
+      service-key: LuOmWzPRFEp4asq7iwuM2e%2FgkyoRK5nw1dXv%2F3QdMo8kxm9oxvr0PCnRTQfxGgMMvyuIfyzzm%2BIM1WqdYBgpPg%3D%3D
+
+gcp:
+  bucket:
+    name: jhta-restaurants-sns-service

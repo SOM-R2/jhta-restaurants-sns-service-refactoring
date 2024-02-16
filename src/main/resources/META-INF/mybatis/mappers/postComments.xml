@@ -1,0 +1,46 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.PostCommentMapper">
+	
+	<insert id="insertComment" parameterType="PostComment">
+		<selectKey keyProperty="id" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+		insert into POST_COMMENTS
+		(id, content, post_id, customer_id, create_date, update_date)
+		values
+		(#{id}, #{content}, #{post.id}, #{customer.id}, #{createDate}, #{updateDate})
+	</insert>
+	
+	<select id="getCommentsByPostId" parameterType="int" resultType="PostComment">
+		select
+			A.id as id,
+			A.content as content,
+			A.disabled as disabled,
+			A.create_date as createDate,
+			A.update_date as updateDate,
+			A.post_id as "post.id",
+			A.customer_id as "customer.id",
+			U.full_name as "customer.fullName",
+			U.username as "customer.username"
+		from POST_COMMENTS A, USERS U
+		where post_id = #{value}
+		and A.customer_id = U.id
+	</select>
+	
+	<delete id="deleteCommentsByPostId">
+		delete 
+		from
+			POST_COMMENTS
+		where
+			post_id = #{value}
+	</delete>
+	
+	<delete id="deleteComment">
+		delete 
+		from
+			POST_COMMENTS
+		where
+			id = #{value}
+	</delete>
+	
+</mapper>

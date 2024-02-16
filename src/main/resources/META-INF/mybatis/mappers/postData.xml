@@ -1,0 +1,34 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.PostDataMapper">
+	<insert id="insertPostData" parameterType="PostData">
+	    INSERT INTO POST_DATA
+	    	(post_id, store_id, content, picture_file, customer_id, createDate)
+	    VALUES 
+	    	(#{post.id}, #{store.id}, #{content}, #{pictureFile}, #{user.id}, #{createDate})
+	</insert>
+	
+	<select id="getPostDataByPostId" parameterType="int" resultType="PostDataDto">
+		select 
+		    a.id as id,
+		    a.post_id as postId,
+		    a.store_id as storeId,
+		    a.content as content,
+		    a.picture_file as pictureFile,
+		    s.name as storeName, 
+		    s.address as storeAddress,
+		    AVG(r.rating) as averageRating
+		from POST_DATA a
+		join STORES s on a.store_id = s.id
+		join REVIEWS r on s.id = r.store_id
+		where a.post_id = #{id}
+		group by a.id, a.post_id, a.store_id, a.content, a.picture_file, s.name, s.address;
+	</select>
+	
+	<delete id="deletePostDataByPostId" parameterType="int">
+		delete 
+		from
+			POST_DATA
+		where
+			post_id = #{value}
+	</delete>
+</mapper>

@@ -1,0 +1,50 @@
+{
+	"folders": {},
+	"connections": {
+		"mysql8-189aa6e182e-1f3899f49c32d8e7": {
+			"provider": "mysql",
+			"driver": "mysql8",
+			"name": "database1 2",
+			"save-password": true,
+			"configuration": {
+				"host": "database-1.csebivwnfevt.us-east-2.rds.amazonaws.com",
+				"port": "3306",
+				"database": "database1",
+				"url": "jdbc:mysql://database-1.csebivwnfevt.us-east-2.rds.amazonaws.com:3306/database1",
+				"configurationType": "MANUAL",
+				"home": "mysql_client",
+				"type": "dev",
+				"auth-model": "native"
+			}
+		},
+		"mysql8-18d892317c1-74f59772eb3cfb15": {
+			"provider": "mysql",
+			"driver": "mysql8",
+			"name": "localhost",
+			"save-password": true,
+			"configuration": {
+				"host": "localhost",
+				"port": "3306",
+				"url": "jdbc:mysql://localhost:3306/",
+				"configurationType": "MANUAL",
+				"home": "C:\\Program Files\\MySQL\\MySQL Server 8.0",
+				"type": "dev",
+				"auth-model": "native"
+			}
+		}
+	},
+	"connection-types": {
+		"dev": {
+			"name": "Development",
+			"color": "255,255,255",
+			"description": "Regular development database",
+			"auto-commit": true,
+			"confirm-execute": false,
+			"confirm-data-change": false,
+			"smart-commit": false,
+			"smart-commit-recover": true,
+			"auto-close-transactions": true,
+			"close-transactions-period": 1800
+		}
+	}
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.BookmarkMapper">
+
+	<insert id="insertBookmark" parameterType="int">
+		insert into BOOKMARKS
+			(store_id, customer_id)
+		values
+			(#{storeId},#{customerId})
+	</insert>
+	
+	
+	<delete id="deleteBookmark" parameterType="int">
+		delete from BOOKMARKS
+		where 
+			store_id = #{storeId} and customer_id = #{customerId}
+	</delete>
+	
+	<select id="getBookmarksByCustomerId" parameterType="int" resultType="Bookmark">
+		select
+			id as id,
+			store_id as "store.id",
+			customer_id as "customer.id"
+		from
+			BOOKMARKS
+		where
+			customer_id = #{customerId}
+		order by id asc
+	</select>
+	
+	<select id="getBookmarkByStoreIdAndCustomerId" resultType="Bookmark">
+		select
+			store_id		as "store.id",
+			customer_id		as "customer.id"
+		from
+			BOOKMARKS
+		where
+			store_id = #{storeId}
+			and customer_id = #{customerId}		
+	</select>
+</mapper>

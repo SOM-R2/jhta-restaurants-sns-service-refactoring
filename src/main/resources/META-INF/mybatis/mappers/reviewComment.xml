@@ -1,0 +1,68 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.ReviewCommentMapper">
+	
+	<insert id="insertReviewComment" parameterType="ReviewComment">
+		<selectKey keyProperty="id" resultType="int" order="AFTER">
+		     SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into REVIEW_COMMENTS
+		(content, review_id, owner_id, create_date, update_date)
+		values
+		(#{content}, #{review.id}, #{owner.id}, #{createDate}, #{updateDate})
+	</insert>
+	
+	<select id="getReviewCommentByReviewId" parameterType="int" resultType="ReviewComment">
+		select
+			id				as id,
+			content			as content,
+			create_date		as createDate,
+			update_date		as updateDate,
+			disabled		as disabled,
+			review_id		as "review.id",
+			owner_id		as "owner.id"
+		from
+			REVIEW_COMMENTS
+		where review_id = #{value}		
+	</select>
+	
+	<select id="getReviewCommentAndUserByReviewId" parameterType="int" resultType="ReviewCommentDto">
+		select
+			c.id				as id,
+			c.content			as content,
+			c.create_date		as createDate,
+			c.update_date		as updateDate,
+			a.review_avg		as reviewAvg,
+			u.username			as username, 
+			u.nickname			as nickname, 
+			u.profile_picture_name as profilePictureName,
+			u.id				as userId,
+			c.review_id         as reviewId
+		from
+			REVIEW_COMMENTS c
+		join USERS u ON c.owner_id = u.id
+		left join (
+			select
+			customer_id,
+			AVG(rating) AS review_avg
+			FROM REVIEWS
+			GROUP BY customer_id
+		) a ON u.id = a.customer_id
+		where review_id = #{value}	
+		ORDER BY c.create_date DESC	
+	</select>
+	
+	<delete id="deleteReviewComment" parameterType="int">
+		delete from 
+			REVIEW_COMMENTS
+		where
+			id = #{id}
+	</delete>
+	
+	<delete id="deleteReviewCommentByReviewId" parameterType="int">
+		delete from 
+			REVIEW_COMMENTS
+		where
+			review_id = #{value};
+	</delete>
+	
+</mapper>

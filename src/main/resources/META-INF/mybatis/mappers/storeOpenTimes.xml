@@ -1,0 +1,14 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.StoreOpenTimeMapper">
+
+	<select id="getStoreOpenTimesByStoreId" parameterType="int" resultType="StoreOpenTime">
+		select
+			id			as id,
+			day			as day,
+			open_time	as openTime,
+			close_time	as closeTime,
+			store_id	as "store.id"
+		from STORE_OPEN_TIMES	
+		where store_id = #{value}
+	</select>
+</mapper>

@@ -1,0 +1,11 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.InquiryMapper">
+	<insert id="insertInquiry" parameterType="kr.co.jhta.restaurants_service.vo.inquiry.Inquiry">
+		insert into INQUIRY
+		(title, user_id, content)
+		values
+		(#{title}, #{user.id}, #{content})
+	</insert>
+
+	
+</mapper>

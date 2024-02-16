@@ -1,0 +1,13 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.FoodMapper">
+
+	<select id="getFoodsByStoreId" parameterType="int" resultType="Food">
+		select
+			id			as id,
+			name		as name,
+			price		as price,
+			store_id	as "store.id"
+		from FOODS
+		where store_id = #{value}
+	</select>
+</mapper>

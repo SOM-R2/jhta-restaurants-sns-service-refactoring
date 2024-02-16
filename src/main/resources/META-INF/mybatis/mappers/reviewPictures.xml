@@ -1,0 +1,29 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.ReviewPictureMapper">
+	
+	<insert id="insertReveiwPicture" parameterType="ReviewPicture">
+	  insert into REVIEW_PICTURES
+	  (picture_name, review_id, user_id, createDate)
+	  values
+	  (#{pictureName}, #{review.id}, #{user.id}, #{createDate})
+	</insert>
+	
+	<select id="getReviewPicturesByReviewId" parameterType="int" resultType="ReviewPicture">
+		select 
+			id,			
+			picture_name	as pictureName,	
+			review_id		as "review.id"
+		from 
+			REVIEW_PICTURES
+		where 
+			review_id = #{value};
+	</select>
+
+  	<delete id="deleteReviewPictures" parameterType="int">
+		delete from 
+			REVIEW_PICTURES
+		where
+			review_id = #{value};
+	</delete>
+
+</mapper>

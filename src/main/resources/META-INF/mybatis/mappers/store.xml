@@ -1,0 +1,379 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.StoreMapper"> 
+
+	<select id = "getStores" parameterType="map" resultType="SearchedStore">
+		select *,
+			   (SELECT 
+			   		RP.PICTURE_NAME 
+			   	FROM 
+			   		REVIEW_PICTURES RP 
+			   	JOIN REVIEWS R ON RP.review_id = R.id 
+			   		WHERE RESULT.id = R.store_id limit 1 offset 0) pictureName
+		from (
+						select
+				            id      			as id,
+				            name    			as name,
+				            address				as address,
+				           	review_avg			as reviewAvg,
+				           	review_cnt			as reviewCnt,
+				           	((review_avg * review_cnt) / (review_cnt + 5)) as combinedScore,
+				           	bookmark_cnt		as bookmarkCnt,
+				           	category			as category,
+				           	latitude			as latitude,
+				           	longitude			as longitude,				           	
+							<choose>
+								<when test="sort == 'rating'">
+									row_number() over (order by ((review_avg * review_cnt) / (review_cnt + 5)) desc) row_num
+								</when>
+								<when test="sort == 'bookmark'">
+									row_number() over (order by bookmark_cnt desc) row_num
+								</when>
+								<when test="sort == 'review'">
+									row_number() over (order by review_cnt desc) row_num
+								</when>
+							</choose>
+				        from
+				        	 (select distinct id,
+				        	 		S.name,
+				        	 		category,
+				        	 		address,
+				        	 		IFNULL(review_cnt,0) review_cnt,
+				        	 		IFNULL(review_avg,0) review_avg,
+				        	 		IFNULL(bookmark_cnt,0) bookmark_cnt,
+				        	 		S.latitude,
+				        	 		S.longitude  
+				        	 	
+				        	 from
+					        	   STORES S left join 
+					        	   (select 
+						        	 	store_id, 
+						        	 	AVG(rating) as review_avg, 
+						        	 	COUNT(*) as review_cnt
+							        from REVIEWS
+							        group by store_id
+						           ) R on S.id = R.store_id
+						        	 
+						        	 left join
+						        	 (
+						        	 	select
+							        	 	store_id,
+							        	 	COUNT(*) as bookmark_cnt
+						        	 	
+							        	from BOOKMARKS
+							        	group by store_id
+						        	 ) B on S.id = B.store_id
+						        	 	left join
+						        	 	(
+						        	 		select
+						        	 			store_id,
+						        	 			F.name
+						        	 		from FOODS F
+						        	 	) F on S.id = F.store_id
+							<where>
+								<if test="category != null">
+								     S.category =  #{category}
+							    </if>
+							   
+								<if test="keyword != null">
+									and
+									(S.name like CONCAT('%', #{keyword}, '%')
+									or F.name like CONCAT('%', #{keyword}, '%')
+									or S.address like CONCAT('%', #{keyword}, '%')
+									or S.category like CONCAT('%', #{keyword}, '%'))
+								</if>
+								
+								<if test="xStart != null">
+									and 
+									(#{xStart} &lt; S.longitude) and (S.longitude &lt; #{xEnd}) and
+									(#{yStart} &lt; S.latitude) and (S.latitude &lt; #{yEnd})
+								</if>
+							    
+							</where>
+							) as RAW
+						   
+			) as RESULT
+		
+		where row_num between #{begin} and #{end};
+
+	</select>
+
+	<!--키워드검색,  카테고리화 할때 전체 row 자체가 해당 되는 row만 잡혀야함 -->
+	<select id="getTotalRows" parameterType="map" resultType="int">
+	  select count(distinct S.id)
+	  from STORES S left join
+	  	FOODS F on S.id = F.store_id
+	  <where>
+		<if test="category != null">
+			     S.category =  #{category}
+		</if>
+		<if test="keyword != null">
+			and
+			(S.name like CONCAT('%', #{keyword}, '%')
+			or F.name like CONCAT('%', #{keyword}, '%')
+			or S.address like CONCAT('%', #{keyword}, '%'))
+			
+		</if>
+		<if test="xStart != null">
+			and 
+			(#{xStart} &lt; S.longitude) and (S.longitude &lt; #{xEnd}) and
+			(#{yStart} &lt; S.latitude) and (S.latitude &lt; #{yEnd})
+		</if>
+	  </where>
+	</select>
+
+	<select id="getStoreById" parameterType="int" resultType="Store">
+		select
+			s.id 					as id,
+			s.business_license		as businessLicense,
+			s.name					as name,
+			s.address				as address,
+			s.category				as category,
+			s.zipcode				as zipcode,
+			s.latitude				as latitude,
+			s.longitude				as longitude,
+			s.description			as description,
+			s.phone					as phone,
+			s.read_count			as readCount,
+			s.create_date			as createDate,
+			s.update_date			as updateDate,
+			s.owner_id				as "owner.id",
+			u.username 				as "owner.username",
+			s.disabled				as disabled
+		from
+			STORES as s
+		inner join USERS as u on s.owner_id = u.id 
+		where s.id = #{value}
+	</select>
+	
+	<select id="getStoreByName" parameterType="String" resultType="Store">
+		select
+			id 					as id,
+			business_license	as businessLicense,
+			name				as name,
+			address				as address,
+			category			as category,
+			zipcode				as zipcode,
+			latitude			as latitude,
+			longitude			as longitude,
+			description			as description,
+			phone				as phone,
+			read_count			as readCount,
+			create_date			as createDate,
+			update_date			as updateDate,
+			owner_id			as "owner.id",
+			disabled			as disabled
+		from
+			STORES
+		where name like  concat(#{value}, '%')
+	</select>
+	
+	<select id="getAllStores" resultType="Store">
+		select
+			id 					as id,
+			business_license	as businessLicense,
+			name				as name,
+			address				as address,
+			category			as category,
+			zipcode				as zipcode,
+			latitude			as latitude,
+			longitude			as longitude,
+			description			as description,
+			phone				as phone,
+			read_count			as readCount,
+			create_date			as createDate,
+			update_date			as updateDate,
+			owner_id			as "owner.id",
+			disabled			as disabled
+		from
+			STORES
+	</select>
+
+	<select id = "getVisitedStoresById" parameterType="map" resultType="VisitedStore">
+		select 
+			S.id						as id,
+			S.name 						as name,
+			S.category					as category,
+			review_avg					as reviewAvg,
+			if(B.id, 'y', 'n')			as isBookmarked,
+			(SELECT RP.PICTURE_NAME 
+			 FROM REVIEW_PICTURES RP 
+			 JOIN REVIEWS R ON RP.review_id = R.id 
+			 WHERE S.id = R.store_id limit 1 offset 0) pictureName
+		from STORES S 
+			left join 
+	       	   (select 
+	        	 	store_id, 
+	        	 	AVG(rating) as review_avg 
+		        from REVIEWS
+		        group by store_id
+	           ) R on S.id = R.store_id
+	           		left join 
+	           			BOOKMARKS B on S.id = B.store_id and B.customer_id  = #{customerId}
+		where
+			S.id in 
+			<foreach index="index"  item="id" collection="storeIds" open="(" close=")" separator=",">
+				#{id}
+			</foreach>
+	</select>
+	
+	<select id = "getVisitedStores" parameterType="map" resultType="VisitedStore">
+		select 
+			S.id						as id,
+			S.name 						as name,
+			S.category					as category,
+			review_avg					as reviewAvg,
+			'n' 						as isBookmarked,
+			(SELECT RP.PICTURE_NAME 
+			 FROM REVIEW_PICTURES RP 
+			 JOIN REVIEWS R ON RP.review_id = R.id 
+			 WHERE S.id = R.store_id limit 1 offset 0) pictureName
+		from STORES S 
+			left join 
+	       	   (select 
+	        	 	store_id, 
+	        	 	AVG(rating) as review_avg 
+		        from REVIEWS
+		        group by store_id
+	           ) R on S.id = R.store_id
+		where
+			S.id in 
+			<foreach index="index"  item="id" collection="storeIds" open="(" close=")" separator=",">
+				#{id}
+			</foreach>
+	</select>
+	
+	<select id = "getBookmarkedStoresByUserId" parameterType="int" resultType="BookmarkedStore">
+		select 
+			S.id			as id,
+			S.name 			as name,
+			S.category		as category,
+			review_avg		as reviewAvg,
+			B.customer_id	as "user.id",
+			(SELECT RP.PICTURE_NAME 
+			 FROM REVIEW_PICTURES RP 
+			 JOIN REVIEWS R ON RP.review_id = R.id 
+			 WHERE S.id = R.store_id limit 1 offset 0) pictureName
+		from STORES S 
+			left join 
+	       	  BOOKMARKS B on S.id = B.store_id
+	       	   left join
+	       	   (select 
+	        	 	store_id, 
+	        	 	AVG(rating) as review_avg 
+		        from REVIEWS
+		        group by store_id
+	           ) R on S.id = R.store_id
+	    where 
+	    	B.customer_id = #{value}	
+	</select>
+  
+	<update id="updateStore" parameterType="Store">
+		update STORES
+		set
+			business_license	= #{businessLicense},
+			name				= #{name},
+			address				= #{address},
+			category			= #{category},
+			zipcode				= #{zipcode},
+			latitude			= #{latitude},
+			longitude			= #{longitude},
+			description			= #{description},
+			phone				= #{phone},
+			read_count			= #{readCount},
+			update_date			= #{updateDate},
+			owner_id			= #{owner.id},
+			disabled			= #{disabled}
+		where
+			id = #{id}
+	</update>
+	
+	<insert id="insertBookmark" parameterType="map">
+	    INSERT INTO BOOKMARKS (store_id, customer_id)
+	    VALUES (#{storeId}, #{customerId})
+	</insert>
+	
+	<delete id="deleteBookmark" parameterType="map">
+	    DELETE FROM BOOKMARKS
+	    WHERE store_id = #{storeId} AND customer_id = #{customerId}
+	</delete>
+	
+	<select id="getReviewCountByStoreId" parameterType="int" resultType="int">
+		select 
+			count(*)
+		from
+			REVIEWS
+		where store_id = #{value}
+	</select>
+	
+	<select id="getBookmarkCountByStoreId" parameterType="int" resultType="int">
+		select
+			count(*)
+		from
+			BOOKMARKS
+		where store_id = #{value}		
+	</select>
+
+	<select id="getClosestStores" resultType="Store">
+		SELECT x.*, (select avg(rating) from REVIEWS r where r.store_id = x.id) averageRating,
+			(select rp.picture_name 
+			 from REVIEWS r2, REVIEW_PICTURES rp
+			 where r2.id = rp.review_id 
+			 and r2.store_id = x.id
+			 LIMIT 1) as pictureName
+		FROM (
+			SELECT
+				id 					AS id,
+				business_license 	AS businessLicense,
+				name 				AS name,
+				address 			AS address,
+				category 			AS category,
+				zipcode AS zipcode,
+				latitude AS latitude,
+				longitude AS longitude,
+				description AS description,
+				phone AS phone,
+				read_count AS readCount,
+				create_date AS createDate,
+				update_date AS updateDate,
+				owner_id AS "owner.id",
+				disabled AS disabled,
+				(
+					6371 *
+					acos(
+						cos(radians(#{latitude})) *
+						cos(radians(latitude)) *
+						cos(radians(longitude) - radians(#{longitude})) +
+						sin(radians(#{latitude})) *
+						sin(radians(latitude))
+					)
+				) AS distance
+			FROM STORES
+			WHERE STORES.id != #{storeId}
+			ORDER BY distance asc
+			LIMIT #{limit}
+		) x
+	</select>
+		
+	<select id="getFollowerReviewedByStoreId" resultType="Customer">
+		SELECT  u.id, 
+				u.username 
+		FROM REVIEWS r JOIN USERS u on r.customer_id = u.id  
+		WHERE r.store_id = #{storeId}
+		AND r.customer_id IN (SELECT f.follower_id  
+		                      FROM FOLLOWS f
+		                      where f.followed_id = #{customerId})
+		ORDER BY r.id DESC 
+		limit 5;
+	</select>
+
+	<select id="getBookmarkByStoreIdAndCustomerId" resultType="Bookmark">
+		select
+			store_id		as "store.id",
+			customer_id		as "customer.id"
+		from
+			BOOKMARKS
+		where
+			store_id = #{storeId}
+			and customer_id = #{customerId}		
+	</select>
+</mapper>

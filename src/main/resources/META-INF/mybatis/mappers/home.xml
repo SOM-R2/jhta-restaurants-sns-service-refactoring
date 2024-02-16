@@ -1,0 +1,149 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.HomeMapper">
+	
+	<resultMap id="HomeResultByFollowMap" type="HomeFeed">
+	    <id column="id" property="id" />
+	    <result column="username" property="username" />
+	    <result column="userId" property="userId" />
+	    <result column="storeName" property="storeName" />
+	    <result column="category" property="category" />
+	    <result column="address" property="address" />
+	    <result column="content" property="content" />
+	    <result column="createDate" property="createDate" />
+	    <result column="reviewId" property="reviewId" />
+	    <result column="rating" property="rating" />
+	    <result column="storeId" property="storeId"/>
+	    <result column="isBookmarked" property="isBookmarked"/>
+	    <result column="isLiked" property="isLiked"/>
+	    <result column="likedCount" property="likedCount"/>
+	    <result column="isFollowed" property="isFollowed"/>
+	    
+	    <collection column="reviewId" property="reviewPictures" ofType="ReviewPicture" 
+         			select="kr.co.jhta.restaurants_service.mapper.ReviewPictureMapper.getReviewPicturesByReviewId"/>
+	</resultMap>
+	
+	<select id="getMyFeedsByFollowerId" resultMap="HomeResultByFollowMap">
+		select 
+			*,
+			ROW_NUMBER() OVER (ORDER BY priority asc, ((259200/TIME_TO_SEC(TIMEDIFF(NOW(),createDate)))+(likedCount+1)) DESC) as id,
+			if((select X.followed_id from FOLLOWS X where X.follower_id = #{userId} and X.followed_id =  subquery.userId), 'y', 'n') as isFollowed
+		from
+			(select
+				R.id			as reviewId,
+				U.username		as username, 
+				U.id			as userId,
+				content			as content,
+				S.name			as storeName,
+				S.id			as storeId,
+				S.category		as category,
+				S.address		as address,
+				R.rating		as rating,
+				R.create_date	as createDate,
+				if(B.id, 'y', 'n')	as isBookmarked,
+				if(L.id, 'y', 'n')	as isLiked,
+				R.liked_count as likedCount,
+				1 as priority	
+			from REVIEWS R
+			join USERS U on R.customer_id = U.id
+			join STORES S on R.store_id = S.id
+			join FOLLOWS F on R.customer_id = F.followed_id and #{userId} = F.follower_id
+			left join BOOKMARKS B on S.id = B.store_id and B.customer_id  = #{userId}
+			left join REVIEW_LIKES L on R.id = L.review_id and #{userId} = L.customer_id
+			
+			union
+			
+			select
+				R.id			as reviewId,
+				U.username		as username, 
+				U.id			as userId,
+				R.content		as content,
+				S.name			as storeName,
+				S.id			as storeId,
+				S.category		as category,
+				S.address		as address,
+				R.rating		as rating,
+				R.create_date	as createDate,
+				if(B.id, 'y', 'n')	as isBookmarked,
+				if(L.id, 'y', 'n')	as isLiked,
+				R.liked_count as likedCount,
+				2 as priority
+			from REVIEWS R
+			join USERS U on R.customer_id = U.id
+			join STORES S on R.store_id = S.id
+			left join BOOKMARKS B on S.id = B.store_id and B.customer_id  = #{userId}
+			left join REVIEW_LIKES L on R.id = L.review_id and #{userId} = L.customer_id
+			) subquery	
+		limit #{begin}, #{limit}
+	</select>
+	
+	<resultMap id="HomeAnonymousResultMap" type="HomeAnonymousFeed">
+	    <id column="id" property="id" />
+   	    <result column="username" property="username" />
+	    <result column="reviewId" property="reviewId" />
+	    <result column="userId" property="userId" />
+	    <result column="content" property="content" />
+	    <result column="storeName" property="storeName" />
+	    <result column="storeId" property="storeId" />
+	    <result column="category" property="category" />
+	    <result column="address" property="address" />
+	    <result column="rating" property="rating" />
+   	    <result column="createDate" property="createDate" />
+   	    <result column="likedCount" property="likedCount" />
+	    <collection column="reviewId" property="reviewPictures" ofType="ReviewPicture" 
+         			select="kr.co.jhta.restaurants_service.mapper.ReviewPictureMapper.getReviewPicturesByReviewId"/>
+	</resultMap>
+	<select id="getAnonymousFeeds" resultMap="HomeAnonymousResultMap">
+		select 
+			*,
+			ROW_NUMBER() OVER (ORDER BY ((259200/TIME_TO_SEC(TIMEDIFF(NOW(),createDate)))+(likedCount+1)) DESC) as id
+		from
+			(select
+				R.id			as reviewId,
+				U.username		as username, 
+				U.id			as userId,
+				R.content		as content,
+				S.name			as storeName,
+				S.id			as storeId,
+				S.category		as category,
+				S.address		as address,
+				R.rating		as rating,
+				R.create_date	as createDate,
+				R.liked_count as likedCount	
+				
+			from REVIEWS R
+			join USERS U on R.customer_id = U.id
+			join STORES S on R.store_id = S.id
+
+			) as subquery
+		limit #{begin}, #{limit}
+	</select>
+	
+	<select id="getPostsOrderByLike" resultType="HomePostDto">
+	    select
+			p.id             as id,
+			p.title          as title,
+			p.sub_title      as subTitle,
+			p.create_date 	 as createDate,
+			p.update_date 	 as updateDate,
+			p.customer_id    as "customer.id",
+			u.username 	   	 as "customer.username",
+			p.report_count   as reportCount,
+			p.disabled       as disabled,
+			p.blocked        as blocked,
+			filename	 	 as pictureFile,	
+			p.liked_count	 as likedCount
+		from
+			POSTS p
+		join
+			USERS u on p.customer_id = u.id
+	    join
+	    	(select 
+	    		p.id,  (select pd.picture_file  from POST_DATA pd where pd.post_id = p.id LIMIT 1) filename 
+			 from 
+				POSTS p) D on p.id = D.id
+		order by likedCount desc		
+		limit 0,5
+	</select>
+	
+
+</mapper>

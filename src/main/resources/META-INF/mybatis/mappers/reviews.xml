@@ -1,0 +1,347 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.ReviewMapper">
+
+	<insert id="insertReview" parameterType="Review">
+	  insert into REVIEWS
+	  	(rating, content, customer_id, store_id, create_date, update_date)
+	  values
+	  	(#{rating}, #{content}, #{customer.id}, #{store.id}, #{createDate}, #{updateDate})
+	  <selectKey keyProperty="id" resultType="int" order="AFTER">
+           SELECT LAST_INSERT_ID()
+      </selectKey>
+	</insert>
+	
+	<select id="getReviewById" parameterType="int" resultType="Review">
+		select 
+			id,			
+			rating,
+			content,
+			create_date		as 	createDate,
+			update_date		as	updateDate,
+			liked_count		as	likedCount,
+			report_count	as  reportCount,
+			disabled,
+			blocked,
+			customer_id		as "customer.id",		
+			store_id		as "store.id"
+		from 
+			REVIEWS
+		where 
+			id = #{value};
+	</select>
+	
+	<select id="getAllReviewsByCustomerId" parameterType="int" resultType="Review">
+		select 
+			id,			
+			rating,
+			content,
+			create_date		as 	createDate,
+			update_date		as	updateDate,
+			liked_count		as	likedCount,
+			report_count	as  reportCount,
+			disabled,
+			blocked,
+			customer_id		as "customer.id",		
+			store_id		as "store.id"
+		from 
+			REVIEWS
+		where customer_id = #{value}
+		order by update_date desc;
+	</select>
+
+	<select id="getReviewByCustomerId" parameterType="int" resultType="Review">
+		select 
+			id,			
+			rating,
+			content,
+			create_date		as 	createDate,
+			update_date		as	updateDate,
+			liked_count		as	likedCount,
+			report_count	as  reportCount,
+			disabled,
+			blocked,
+			customer_id		as "customer.id",		
+			store_id		as "store.id"
+		from 
+			REVIEWS
+		where 
+			customer_id = #{value};
+	</select>
+	<select id="getAllReviewsByStoreId" parameterType="int" resultType="Review">
+		select 
+			id,			
+			rating,
+			content,
+			create_date		as 	createDate,
+			update_date		as	updateDate,
+			liked_count		as	likedCount,
+			report_count	as  reportCount,
+			disabled,
+			blocked,
+			customer_id		as "customer.id",		
+			store_id		as "store.id"
+		from 
+			REVIEWS
+		where store_id = #{value}
+		order by update_date desc;
+	</select>
+	
+	<select id="getReviewByStoreId" parameterType="int" resultType="Review">
+		select 
+			id,			
+			rating,
+			content,
+			create_date		as 	createDate,
+			update_date		as	updateDate,
+			liked_count		as	likedCount,
+			report_count	as  reportCount,
+			disabled,
+			blocked,
+			customer_id		as "customer.id",		
+			store_id		as "store.id"
+		from 
+			REVIEWS
+		where 
+			store_id = #{value};
+	</select>
+	
+	<select id="getAllReviewRatingByStoreId" parameterType="int" resultType="ReviewSummaryDto">
+		select 
+			SUM(CASE WHEN RATING = 1 THEN 1 ELSE 0 END) as bad,
+			SUM(CASE WHEN RATING = 3 THEN 1 ELSE 0 END) as soso,
+			SUM(CASE WHEN RATING = 5 THEN 1 ELSE 0 END) as good
+		from REVIEWS
+		where store_id = #{value};	
+	</select>
+
+	<resultMap id="ReviewResultMap" type="ReviewDto">
+		<id column="id" property="id" />
+		<result column="rating" property="rating" />
+		<result column="content" property="content" />
+		<result column="create_date" property="createDate" />
+		<result column="update_date" property="updateDate" />
+		<result column="liked_count" property="likedCount" />
+		<result column="report_count" property="reportCount" />
+		<result column="disabled" property="disabled" />
+		<result column="blocked" property="blocked" />
+		<result column="review_avg" property="reviewAvg"/>
+		<result column="customer_id" property="customerId" />
+		<result column="username" property="customerName" />
+		<result column="nickname" property="nickname" />
+		<result column="owner_Id" property="ownerId" />
+		<result column="isLiked" property="isLiked"/>
+		<result column="comment_count" property="commentCount"/>
+		<collection property="reviewPictures" column="id" ofType="ReviewPicture"
+					select="kr.co.jhta.restaurants_service.mapper.ReviewPictureMapper.getReviewPicturesByReviewId"/>
+		<collection property="reviewKeywords" column="id" ofType="ReviewKeyword"
+					select="kr.co.jhta.restaurants_service.mapper.ReviewKeywordMapper.getReviewKeywordsByReviewId"/>
+		<collection property="reviewComments" column="id" ofType="ReviewCommentDto"
+					select="kr.co.jhta.restaurants_service.mapper.ReviewCommentMapper.getReviewCommentAndUserByReviewId"/>
+	</resultMap>
+
+	<select id="getReviewsPaginatedByStoreId" resultMap="ReviewResultMap">
+	    SELECT
+	        r.id,
+	        r.rating,
+	        r.content,
+	        r.create_date,
+	        r.update_date,
+	        r.liked_count,
+	        r.report_count,
+	        r.disabled,
+	        r.blocked,
+	        a.review_avg,
+	        r.customer_id,
+	        u.username,
+	        u.nickname,
+	        s.owner_Id,
+	        if(l.id, 'y', 'n') as isLiked,
+	        c.comment_count
+	    FROM REVIEWS r
+	    JOIN USERS u ON r.customer_id = u.id
+	    JOIN STORES s ON r.store_id = s.id
+	    LEFT JOIN REVIEW_LIKES l on r.id = l.review_id and #{customerId} = l.customer_id
+	    JOIN (
+	        SELECT
+	        customer_id,
+	        AVG(rating) AS review_avg
+	        FROM REVIEWS
+	        GROUP BY customer_id
+	    ) a ON u.id = a.customer_id
+	    LEFT JOIN (
+	        SELECT
+	            review_id,
+	            COUNT(*) AS comment_count
+	        FROM REVIEW_COMMENTS
+	        GROUP BY review_id
+	    ) c ON r.id = c.review_id
+	    WHERE r.store_id = #{storeId}
+	    ORDER BY r.create_date DESC
+	    LIMIT #{begin}, #{end}
+	</select>
+
+	<select id="getThreeFollowerReivews" parameterType="int" resultType="ReviewContentsDto">
+		select
+			r.id,			
+			r.rating,
+			r.content,
+			r.create_date		as 	createDate,
+			r.liked_count		as	likedCount,
+			r.customer_id		as customerId,
+			u.username			as userName,	
+			r.store_id		as storeId,
+			s.name			as storeName,
+			(   SELECT picture_name
+		        FROM REVIEW_PICTURES p
+		        WHERE r.id = p.review_id
+		        LIMIT 1
+		    ) as pictureName
+		from
+			REVIEWS r
+		inner join
+			USERS u on r.customer_id = u.id
+		inner join
+			STORES s on r.store_id = s.id
+		where
+			r.customer_id in (
+				select follower_id
+				from FOLLOWS
+				where followed_id = #{followedId}
+			)
+		order by
+			r.create_date desc
+		limit
+			0, 3
+	</select>
+	
+	<select id="getThreeRecentReivews" parameterType="int" resultType="ReviewContentsDto">
+		select
+			r.id,			
+			r.rating,
+			r.content,
+			r.create_date		as 	createDate,
+			r.liked_count		as	likedCount,
+			r.customer_id		as customerId,
+			u.username			as userName,	
+			r.store_id		as storeId,
+			s.name			as storeName,
+			(   SELECT picture_name
+		        FROM REVIEW_PICTURES p
+		        WHERE r.id = p.review_id
+		        LIMIT 1
+		    ) as pictureName
+		from
+			REVIEWS r
+		inner join
+			STORES s on r.store_id = s.id
+		inner join
+			USERS u on r.customer_id = u.id	
+		order by
+			r.create_date desc
+		limit
+			0, 3
+	</select>
+	
+	<select id="getAllReivewsPaginated" resultType="ReviewContentsDto">
+		select
+			r.id,			
+			r.rating,
+			r.content,
+			r.create_date		as 	createDate,
+			r.liked_count		as	likedCount,
+			r.customer_id		as customerId,
+			u.username			as userName,	
+			r.store_id		as storeId,
+			s.name			as storeName,
+			(   SELECT picture_name
+		        FROM REVIEW_PICTURES p
+		        WHERE r.id = p.review_id
+		        LIMIT 1
+		    ) as pictureName
+		from
+			REVIEWS r
+		inner join
+			STORES s on r.store_id = s.id
+		inner join
+			USERS u on r.customer_id = u.id	
+		order by
+			r.create_date desc
+		limit
+			#{begin}, #{limit}
+	</select>
+	
+	<select id="getFollowerReivewsPaginated" resultType="ReviewContentsDto">
+		select
+			r.id,			
+			r.rating,
+			r.content,
+			r.create_date		as 	createDate,
+			r.liked_count		as	likedCount,
+			r.customer_id		as customerId,
+			u.username			as userName,	
+			r.store_id		as storeId,
+			s.name			as storeName,
+			(   SELECT picture_name
+		        FROM REVIEW_PICTURES p
+		        WHERE r.id = p.review_id
+		        LIMIT 1
+		    ) as pictureName
+		from
+			REVIEWS r
+		inner join
+			STORES s on r.store_id = s.id
+		inner join
+			USERS u on r.customer_id = u.id
+		where
+			r.customer_id in (
+				select follower_id
+				from FOLLOWS
+				where followed_id = #{followedId}
+			)	
+		order by
+			r.create_date desc
+		limit
+			#{begin}, #{limit}
+	</select>
+
+	<select id="getReviewsPaginatedByStoreIdAndRating" resultMap="ReviewResultMap">
+		SELECT
+			r.id,
+			r.rating,
+			r.content,
+			r.create_date,
+			r.update_date,
+			r.liked_count,
+			r.report_count,
+			r.disabled,
+			r.blocked,
+			a.review_avg,
+			r.customer_id,
+			u.username,
+			u.nickname,
+			s.owner_Id,
+			if(l.id, 'y', 'n')	as isLiked
+		FROM REVIEWS r
+		JOIN USERS u ON r.customer_id = u.id
+		JOIN STORES s ON r.store_id = s.id
+		LEFT JOIN REVIEW_LIKES l on r.id = l.review_id and #{customerId} = l.customer_id
+		JOIN (
+			SELECT
+			customer_id,
+			AVG(rating) AS review_avg
+			FROM REVIEWS
+			GROUP BY customer_id
+		) a ON u.id = a.customer_id
+		WHERE r.store_id = #{storeId} and r.rating = #{rating}
+		ORDER BY r.create_date DESC
+		LIMIT #{begin}, #{end}
+	</select>
+  
+  	<delete id="deleteReview" parameterType="int">
+		delete from 
+			REVIEWS
+		where
+			id = #{value}
+	</delete>
+  
+</mapper>

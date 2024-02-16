@@ -1,0 +1,47 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.jhta.restaurants_service.mapper.PostLikeMapper">
+	<insert id="insertLike" parameterType="int">
+		insert into POST_LIKES
+			(customer_id, post_id )
+		values
+			(#{customerId},#{postId})
+	</insert>
+	
+	<delete id="deleteLike" parameterType="int">
+		delete from POST_LIKES
+		where 
+			post_id = #{postId} and customer_id = #{customerId}
+	</delete>
+	
+	<update id="addLike" parameterType="int">
+		update POSTS
+		set liked_count = liked_count + 1
+		where id = #{value}
+	</update>
+	
+	<update id="cancelLike" parameterType="int">
+		update POSTS
+		set liked_count = liked_count - 1
+		where id = #{value}
+	</update>
+	
+	<select id="selectPostLikeByPostIdAndCustomerId" parameterType="int">
+		select 
+			customer_id as customerId,
+			post_id as postId
+		from
+			POST_LIKES
+		where
+			post_id = #{postId}
+		and	customer_id = #{customerId}
+	</select>
+	
+	<delete id="deletePostLikeByPostId" parameterType="int">
+		delete
+		from 
+			POST_LIKES
+		where
+			post_id = #{value}
+	</delete>
+	
+</mapper>
