@@ -6,19 +6,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<style type="text/css">
-    /*html, body {*/
-    /*    height: 100%;*/
-    /*}*/
-
-    .wrap {
-        position: relative;
-        /*min-height: 100%;*/
-        padding-top: 47px;
-        /*padding-bottom: 100px;*/
-    }
-    
-</style>
+<link rel="stylesheet" type="text/css" href="../../../resources/css/common/navbar.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=8dc99e5108c8ac0f59f4315f77a45f84&libraries=services,clusterer,drawing"></script>
