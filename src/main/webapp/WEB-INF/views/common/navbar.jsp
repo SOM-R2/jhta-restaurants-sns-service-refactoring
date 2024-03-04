@@ -11,7 +11,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=8dc99e5108c8ac0f59f4315f77a45f84&libraries=services,clusterer,drawing"></script>
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=8dc99e5108c8ac0f59f4315f77a45f84"></script>
-
+<script src="../../../resources/js/common/navbar.js" defer></script>
 <!-- 모달 -->
 <div class="modal fade" id="bookmarkModal" tabindex="-1"
 	aria-labelledby="bookmarkModalLabel" aria-hidden="true">
