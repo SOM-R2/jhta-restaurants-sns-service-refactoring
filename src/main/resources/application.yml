@@ -43,7 +43,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: duqrlvlfry02@gmail.com
-    password: sjleee1
+    password: azae qrmi imfq ttan
     properties:
       mail:
         smtp:
@@ -59,7 +59,7 @@ spring:
 
 mybatis:
   mapper-locations:
-    - META-INF/mybatis/mappers/*.xml
+    - /mybatis/mappers/*.xml
   configuration:
     jdbc-type-for-null: 'NULL'
     log-impl: org.apache.ibatis.logging.log4j2.Log4j2Impl
